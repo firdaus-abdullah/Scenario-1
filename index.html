@@ -1,56 +1,1131 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <style>...</style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Activity 1 — Classify the Contamination</title>
+<style>
+:root{
+  --bg:#eef2f6;
+  --surface:#ffffff;
+  --surface-2:#f6f9fb;
+  --ink:#0e2233;
+  --ink-2:#41607a;
+  --ink-3:#7593aa;
+  --line:#d8e3ec;
+  --brand:#0d6e6e;
+  --brand-2:#0f8b8b;
+  --brand-soft:#e2f4f3;
+  --accent:#c2410c;
+  --accent-soft:#fdece3;
+  --ok:#15803d;
+  --ok-soft:#e6f6ec;
+  --bad:#b91c1c;
+  --bad-soft:#fdeaea;
+  --warn:#a16207;
+  --warn-soft:#fdf4e3;
+  --violet:#6d28d9;
+  --violet-soft:#f3e8ff;
+  --shadow:0 10px 30px rgba(13,50,80,.10);
+  --radius:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  background:var(--bg);color:var(--ink);
+  -webkit-font-smoothing:antialiased;
+  line-height:1.5;
+  padding-bottom:80px;
+}
+
+/* ================= TOP BAR ================= */
+.topbar{
+  position:sticky;top:0;z-index:50;
+  display:flex;align-items:center;gap:14px;
+  padding:10px 22px;
+  background:rgba(255,255,255,.92);
+  backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--line);
+  flex-wrap:wrap;
+}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:14.5px;letter-spacing:-.1px}
+.logo{
+  width:32px;height:32px;border-radius:9px;flex:0 0 auto;
+  background:linear-gradient(135deg,var(--brand),var(--brand-2));
+  display:grid;place-items:center;color:#fff;font-size:16px;
+}
+.brand small{display:block;font-weight:600;font-size:10.5px;color:var(--ink-3);letter-spacing:.7px;text-transform:uppercase}
+.spacer{flex:1}
+
+.tools{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.tbtn{
+  border:1px solid var(--line);background:var(--surface-2);color:var(--ink-2);
+  padding:8px 14px;border-radius:11px;font-size:12.5px;font-weight:700;
+  cursor:pointer;transition:.18s;font-family:inherit;
+  display:inline-flex;align-items:center;gap:6px;
+}
+.tbtn:hover{background:var(--brand-soft);color:var(--brand);border-color:var(--brand)}
+.tbtn.on{background:var(--violet);color:#fff;border-color:var(--violet)}
+.tbtn.primary{background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;border:none}
+.tbtn.primary:hover{filter:brightness(1.08)}
+
+/* Timer */
+.timer{
+  display:flex;align-items:center;gap:9px;
+  background:var(--surface-2);border:1px solid var(--line);
+  border-radius:11px;padding:5px 8px 5px 13px;
+}
+.timer .clock{
+  font-family:"SF Mono",Consolas,monospace;
+  font-size:16px;font-weight:800;color:var(--brand);
+  letter-spacing:.5px;min-width:62px;text-align:center;
+}
+.timer.warning .clock{color:var(--warn)}
+.timer.danger .clock{color:var(--bad);animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.45}}
+.timer button{
+  border:none;background:var(--brand);color:#fff;
+  width:28px;height:28px;border-radius:8px;
+  font-size:12px;cursor:pointer;display:grid;place-items:center;
+  font-family:inherit;transition:.18s;
+}
+.timer button:hover{filter:brightness(1.12)}
+.timer button.reset{background:var(--ink-3)}
+
+/* ================= LAYOUT ================= */
+.wrap{max-width:1180px;margin:0 auto;padding:30px 22px 40px}
+
+/* ================= HERO ================= */
+.hero{
+  background:linear-gradient(135deg,var(--brand-soft),#ffffff 65%);
+  border:1px solid var(--line);border-radius:22px;
+  padding:28px 32px;box-shadow:var(--shadow);
+  margin-bottom:24px;
+}
+.kicker{
+  display:inline-flex;align-items:center;gap:7px;
+  font-size:11px;font-weight:800;letter-spacing:1.3px;text-transform:uppercase;
+  color:var(--violet);background:var(--violet-soft);
+  padding:5px 12px;border-radius:999px;margin-bottom:14px;
+}
+h1{font-size:clamp(24px,3.4vw,36px);letter-spacing:-.7px;line-height:1.15;margin-bottom:14px}
+.rule{height:4px;width:74px;border-radius:4px;background:linear-gradient(90deg,var(--brand),var(--brand-2));margin-bottom:18px}
+
+.chips{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:20px}
+.chip{
+  display:inline-flex;align-items:center;gap:7px;
+  background:var(--surface);border:1px solid var(--line);
+  padding:7px 14px;border-radius:999px;
+  font-size:12.6px;font-weight:700;color:var(--ink-2);
+  box-shadow:0 2px 6px rgba(13,50,80,.05);
+}
+.chip b{color:var(--brand)}
+
+.instructions{
+  background:var(--surface);border:1px solid var(--line);
+  border-left:4px solid var(--brand);
+  border-radius:0 14px 14px 0;
+  padding:16px 22px 16px 42px;
+  font-size:13.8px;color:var(--ink-2);
+}
+.instructions li{margin-bottom:7px}
+.instructions li:last-child{margin-bottom:0}
+.instructions li::marker{color:var(--brand);font-weight:800}
+.instructions b{color:var(--ink)}
+
+/* ================= SCOREBOARD ================= */
+.scoreboard{
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:20px;padding:22px 26px;box-shadow:var(--shadow);
+  margin-bottom:26px;
+  display:grid;grid-template-columns:1fr auto;gap:26px;align-items:center;
+}
+.score-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px}
+.score-item .lbl{
+  display:flex;justify-content:space-between;align-items:baseline;
+  font-size:12.2px;font-weight:800;color:var(--ink-2);
+  text-transform:uppercase;letter-spacing:.6px;margin-bottom:7px;
+}
+.score-item .lbl span{color:var(--brand);font-size:13px;letter-spacing:0}
+.bar{height:9px;background:var(--line);border-radius:9px;overflow:hidden}
+.bar i{
+  display:block;height:100%;width:0;border-radius:9px;
+  background:linear-gradient(90deg,var(--brand),var(--brand-2));
+  transition:width .5s cubic-bezier(.4,0,.2,1);
+}
+.bar.violet i{background:linear-gradient(90deg,var(--violet),#a78bfa)}
+
+.total-box{
+  text-align:center;padding:14px 26px;
+  background:linear-gradient(135deg,var(--brand),var(--brand-2));
+  border-radius:18px;color:#fff;min-width:150px;
+}
+.total-box b{display:block;font-size:40px;line-height:1;letter-spacing:-1.5px}
+.total-box span{font-size:11px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;opacity:.85}
+
+/* ================= SCENARIO CARDS ================= */
+.section-title{
+  display:flex;align-items:center;gap:11px;
+  font-size:16px;font-weight:800;margin:34px 0 16px;
+  letter-spacing:-.2px;
+}
+.section-title .n{
+  width:28px;height:28px;border-radius:9px;
+  background:var(--brand);color:#fff;
+  display:grid;place-items:center;font-size:13px;
+}
+
+.scenario{
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--radius);box-shadow:var(--shadow);
+  margin-bottom:20px;overflow:hidden;
+  transition:.25s;
+}
+.scenario.checked-ok{border-color:var(--ok);box-shadow:0 10px 30px rgba(21,128,61,.14)}
+.scenario.checked-part{border-color:var(--warn);box-shadow:0 10px 30px rgba(161,98,7,.14)}
+.scenario.checked-bad{border-color:var(--bad);box-shadow:0 10px 30px rgba(185,28,28,.14)}
+
+.sc-head{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 20px;background:var(--surface-2);
+  border-bottom:1px solid var(--line);
+}
+.sc-head .num{
+  width:30px;height:30px;border-radius:9px;flex:0 0 auto;
+  background:linear-gradient(135deg,var(--brand),var(--brand-2));
+  color:#fff;display:grid;place-items:center;
+  font-size:13px;font-weight:900;
+}
+.sc-head h3{font-size:15px;letter-spacing:-.2px;flex:1}
+.sc-head .tag{
+  font-size:10.5px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;
+  background:var(--brand-soft);color:var(--brand);
+  padding:4px 11px;border-radius:999px;
+}
+
+.case{
+  padding:18px 20px;background:var(--violet-soft);
+  border-bottom:1px solid var(--line);
+  font-size:13.8px;line-height:1.7;color:var(--ink-2);
+}
+.case b{color:var(--ink)}
+.case::before{
+  content:"📋 SCENARIO";
+  display:block;font-size:10.5px;font-weight:900;letter-spacing:1.2px;
+  color:var(--violet);margin-bottom:8px;
+}
+
+.q{padding:16px 20px;border-bottom:1px solid var(--line)}
+.q:last-of-type{border-bottom:none}
+.q > label{
+  display:flex;align-items:center;gap:8px;
+  font-size:13px;font-weight:800;color:var(--ink);
+  margin-bottom:10px;
+}
+.q > label .k{
+  width:22px;height:22px;border-radius:7px;flex:0 0 auto;
+  background:var(--brand-soft);color:var(--brand);
+  display:grid;place-items:center;font-size:11px;font-weight:900;
+}
+.q .hint{font-size:11.6px;color:var(--ink-3);font-weight:600;margin-left:auto}
+
+/* Option pills */
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{
+  display:inline-flex;align-items:center;gap:8px;
+  border:1.5px solid var(--line);background:var(--surface-2);
+  color:var(--ink-2);padding:8px 14px;border-radius:11px;
+  font-size:12.8px;font-weight:700;cursor:pointer;
+  transition:.16s;font-family:inherit;
+}
+.opt:hover{border-color:var(--brand);background:var(--brand-soft);color:var(--brand)}
+.opt input{display:none}
+.opt .dot{
+  width:15px;height:15px;border-radius:50%;
+  border:2px solid var(--line);flex:0 0 auto;
+  transition:.16s;position:relative;
+}
+.opt:has(input:checked){
+  border-color:var(--brand);background:var(--brand);color:#fff;
+}
+.opt:has(input:checked) .dot{border-color:#fff;background:#fff}
+.opt:has(input:checked) .dot::after{
+  content:"";position:absolute;inset:3px;border-radius:50%;
+  background:var(--brand);
+}
+.opt.correct{border-color:var(--ok)!important;background:var(--ok-soft)!important;color:var(--ok)!important}
+.opt.correct .dot{border-color:var(--ok)!important;background:var(--ok)!important}
+.opt.correct .dot::after{background:#fff!important}
+.opt.wrong{border-color:var(--bad)!important;background:var(--bad-soft)!important;color:var(--bad)!important}
+.opt.wrong .dot{border-color:var(--bad)!important;background:var(--bad)!important}
+.opt.wrong .dot::after{background:#fff!important}
+.opt:disabled{cursor:default}
+
+/* Select */
+select.ref{
+  width:100%;max-width:520px;
+  border:1.5px solid var(--line);background:var(--surface-2);
+  color:var(--ink);padding:10px 14px;border-radius:11px;
+  font-size:13px;font-family:inherit;font-weight:600;
+  cursor:pointer;transition:.16s;
+  appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%237593aa' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 14px center;
+  padding-right:38px;
+}
+select.ref:hover,select.ref:focus{border-color:var(--brand);outline:none}
+select.ref.correct{border-color:var(--ok);background-color:var(--ok-soft);color:var(--ok);font-weight:800}
+select.ref.wrong{border-color:var(--bad);background-color:var(--bad-soft);color:var(--bad);font-weight:800}
+
+/* Textarea */
+textarea.capa{
+  width:100%;min-height:78px;resize:vertical;
+  border:1.5px solid var(--line);background:var(--surface-2);
+  color:var(--ink);padding:11px 14px;border-radius:11px;
+  font-size:13.2px;font-family:inherit;line-height:1.6;
+  transition:.16s;
+}
+textarea.capa:hover,textarea.capa:focus{border-color:var(--brand);outline:none;background:var(--surface)}
+textarea.capa.correct{border-color:var(--ok);background:var(--ok-soft)}
+textarea.capa.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.counter{font-size:11.4px;color:var(--ink-3);font-weight:700;margin-top:6px;text-align:right}
+
+/* Card footer */
+.sc-foot{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 20px;background:var(--surface-2);
+  border-top:1px solid var(--line);flex-wrap:wrap;
+}
+.check-btn{
+  border:none;background:linear-gradient(135deg,var(--brand),var(--brand-2));
+  color:#fff;padding:9px 20px;border-radius:11px;
+  font-size:12.8px;font-weight:800;cursor:pointer;
+  transition:.18s;font-family:inherit;
+  display:inline-flex;align-items:center;gap:7px;
+}
+.check-btn:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.check-btn:disabled{opacity:.55;cursor:default;transform:none;filter:none}
+
+.score-pill{
+  margin-left:auto;font-size:12.4px;font-weight:900;
+  padding:6px 14px;border-radius:999px;
+  background:var(--line);color:var(--ink-3);
+  transition:.3s;
+}
+.score-pill.ok{background:var(--ok-soft);color:var(--ok)}
+.score-pill.part{background:var(--warn-soft);color:var(--warn)}
+.score-pill.bad{background:var(--bad-soft);color:var(--bad)}
+
+/* Feedback */
+.feedback{
+  display:none;padding:0 20px 18px;
+}
+.feedback.show{display:block;animation:slideIn .3s ease}
+@keyframes slideIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+
+.fb-line{
+  display:flex;gap:10px;align-items:flex-start;
+  padding:10px 14px;border-radius:11px;margin-bottom:8px;
+  font-size:12.8px;line-height:1.55;
+}
+.fb-line.ok{background:var(--ok-soft);border-left:3px solid var(--ok);color:#14532d}
+.fb-line.bad{background:var(--bad-soft);border-left:3px solid var(--bad);color:#7f1d1d}
+.fb-line b{font-weight:900}
+.fb-line .ic{flex:0 0 auto;font-size:13px}
+
+.answer-key{
+  display:none;
+  background:linear-gradient(135deg,var(--violet-soft),#fff);
+  border:1.5px dashed var(--violet);border-radius:12px;
+  padding:14px 18px;margin:0 20px 18px;
+  font-size:13px;line-height:1.7;color:var(--ink-2);
+}
+.answer-key.show{display:block;animation:slideIn .3s}
+.answer-key::before{
+  content:"🔑 FACILITATOR ANSWER KEY";
+  display:block;font-size:10.5px;font-weight:900;letter-spacing:1.2px;
+  color:var(--violet);margin-bottom:8px;
+}
+.answer-key b{color:var(--ink)}
+.answer-key .row{margin-bottom:5px}
+.answer-key .row:last-child{margin-bottom:0}
+.answer-key .lbl{
+  display:inline-block;min-width:96px;
+  font-weight:900;color:var(--violet);
+}
+
+/* ================= PRESENTATION PANEL ================= */
+.presentation{
+  background:linear-gradient(135deg,var(--violet-soft),var(--brand-soft));
+  border:2px dashed var(--violet);border-radius:var(--radius);
+  padding:24px 28px;margin-top:30px;
+}
+.presentation h3{
+  display:flex;align-items:center;gap:10px;
+  font-size:16px;color:var(--violet);margin-bottom:6px;
+}
+.presentation h3 .ic{
+  width:30px;height:30px;border-radius:9px;
+  background:var(--violet);color:#fff;
+  display:grid;place-items:center;font-size:15px;
+}
+.presentation p{font-size:13.2px;color:var(--ink-2);margin-bottom:16px}
+.pres-opts{display:flex;flex-wrap:wrap;gap:10px}
+.pres-opt{
+  flex:1;min-width:150px;
+  border:1.5px solid var(--violet);background:var(--surface);
+  color:var(--violet);padding:12px 14px;border-radius:12px;
+  font-size:12.8px;font-weight:800;cursor:pointer;
+  transition:.18s;font-family:inherit;text-align:left;
+  display:flex;flex-direction:column;gap:3px;
+}
+.pres-opt span{font-size:11.4px;font-weight:600;color:var(--ink-3);line-height:1.4}
+.pres-opt:hover{background:var(--violet);color:#fff}
+.pres-opt:hover span{color:rgba(255,255,255,.85)}
+.pres-opt.active{background:var(--violet);color:#fff;box-shadow:0 8px 20px rgba(109,40,217,.28)}
+.pres-opt.active span{color:rgba(255,255,255,.85)}
+
+/* ================= FOOTER BAR ================= */
+.footbar{
+  position:fixed;bottom:0;left:0;right:0;z-index:45;
+  display:flex;align-items:center;gap:14px;
+  padding:12px 24px;
+  background:rgba(255,255,255,.94);
+  backdrop-filter:blur(10px);
+  border-top:1px solid var(--line);
+  box-shadow:0 -6px 24px rgba(13,50,80,.08);
+  flex-wrap:wrap;
+}
+.foot-score{
+  font-size:14px;font-weight:900;color:var(--brand);
+  display:flex;align-items:baseline;gap:5px;
+}
+.foot-score b{font-size:20px;letter-spacing:-.5px}
+.foot-score span{font-size:11.5px;color:var(--ink-3);font-weight:800;letter-spacing:.6px;text-transform:uppercase}
+.footbar .spacer{flex:1}
+
+/* ================= TOAST ================= */
+.toast{
+  position:fixed;left:50%;bottom:96px;transform:translate(-50%,20px);
+  background:var(--ink);color:#fff;
+  padding:12px 24px;border-radius:12px;
+  font-size:13.2px;font-weight:800;
+  opacity:0;pointer-events:none;transition:.3s;z-index:99;
+  box-shadow:0 14px 34px rgba(0,0,0,.28);
+  max-width:90vw;text-align:center;
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* ================= RESPONSIVE ================= */
+@media(max-width:820px){
+  .wrap{padding:20px 14px 30px}
+  .hero{padding:22px 18px}
+  .scoreboard{grid-template-columns:1fr;gap:18px;padding:18px}
+  .total-box{min-width:0;padding:12px}
+  .total-box b{font-size:32px}
+  .sc-head{padding:12px 14px}
+  .case,.q{padding:14px}
+  .sc-foot{padding:12px 14px}
+  .answer-key{margin:0 14px 14px}
+  .feedback{padding:0 14px 14px}
+  .brand small{display:none}
+  .timer{padding:4px 6px 4px 10px}
+  .timer .clock{font-size:14px;min-width:54px}
+  .pres-opt{min-width:100%}
+}
+
+/* ================= PRINT ================= */
+@media print{
+  body{background:#fff;padding:0}
+  .topbar,.footbar,.toast,.check-btn,.pres-opts,.counter{display:none!important}
+  .wrap{max-width:none;padding:0}
+  .hero,.scoreboard,.scenario,.presentation{
+    box-shadow:none;break-inside:avoid;page-break-inside:avoid;
+  }
+  .scenario{margin-bottom:14px}
+  .answer-key{display:block!important;break-inside:avoid}
+  textarea.capa{min-height:60px;border:1px solid #999;background:#fff}
+  select.ref{background:#fff;border:1px solid #999}
+  .opt{border:1px solid #999;background:#fff;color:#000}
+}
+</style>
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand">...</div>
-    <div class="tools">
-      <div class="timer">...</div>
-      <button id="keyBtn">Show Answer Key</button>
-      <button id="resetBtn">Reset</button>
-      <button id="printBtn">Print</button>
+
+<!-- ================= TOP BAR ================= -->
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">🎯</div>
+    <div>Activity 1 — Classify the Contamination
+      <small>Basic Microbiology · QC Yearly Training Plan 2026</small>
     </div>
-  </header>
-  
-  <main>
-    <section class="hero">
-      <h1>Activity 1 — Classify the Contamination</h1>
-      <div class="chips">👥 Groups of 3–4 | ⏱ 10 minutes | 📋 Scenario cards | 🎤 Group presentation</div>
-      <ol class="instructions">...</ol>
-    </section>
-    
-    <section class="scoreboard">
-      ... 4 scoring bars ...
-      <div class="total">.../10</div>
-    </section>
-    
-    <section class="scenarios">
-      <article class="scenario" data-id="1">
-        <header>Scenario 1 <span class="tag">Case File</span></header>
-        <div class="case">...</div>
-        <div class="q">
-          <label>1. Type of contamination</label>
-          <div class="opts">radio buttons</div>
-        </div>
-        <div class="q">
-          <label>2. Applicable USP chapter / guideline</label>
-          <select>...</select>
-        </div>
-        <div class="q">
-          <label>3. One corrective action (CAPA)</label>
-          <textarea></textarea>
-        </div>
-        <button class="check">Check this card</button>
-        <div class="feedback"></div>
-      </article>
-      ...
-    </section>
-    
-    <section class="presentation-score">
-      Facilitator: Presentation clarity
-    </section>
-  </main>
+  </div>
+  <div class="spacer"></div>
+  <div class="tools">
+    <div class="timer" id="timer">
+      <span class="clock" id="clock">10:00</span>
+      <button id="startBtn" title="Start / Pause">▶</button>
+      <button class="reset" id="resetTimer" title="Reset timer">↺</button>
+    </div>
+    <button class="tbtn" id="keyBtn">🔑 <span>Answer Key</span></button>
+    <button class="tbtn" id="checkAllBtn">✓ Check All</button>
+    <button class="tbtn" id="printBtn">🖨 Print</button>
+    <button class="tbtn" id="resetBtn">↺ Reset</button>
+  </div>
+</header>
+
+<!-- ================= MAIN ================= -->
+<main class="wrap">
+
+  <!-- HERO -->
+  <section class="hero">
+    <span class="kicker">🎯 Group Activity</span>
+    <h1>Activity 1 — Classify the Contamination</h1>
+    <div class="rule"></div>
+
+    <div class="chips">
+      <span class="chip">👥 Groups of <b>3–4</b></span>
+      <span class="chip">⏱ <b>10 minutes</b></span>
+      <span class="chip">📋 <b>5 scenario cards</b></span>
+      <span class="chip">🎤 <b>Group presentation</b></span>
+      <span class="chip">🏆 <b>10 points</b></span>
+    </div>
+
+    <ol class="instructions">
+      <li>Your facilitator will give each group <b>5 scenario cards</b> describing real-world contamination events.</li>
+      <li>For each scenario, identify the <b>type of contamination</b> — pyrogen, microbial, particulate, chemical, cross-contamination, or mycoplasma.</li>
+      <li>Determine which <b>USP chapter or guideline</b> applies to each scenario.</li>
+      <li>Suggest <b>one corrective action</b> to prevent recurrence.</li>
+      <li><b>Present your findings</b> to the class — 2 minutes per group.</li>
+    </ol>
+  </section>
+
+  <!-- SCOREBOARD -->
+  <section class="scoreboard">
+    <div class="score-grid">
+      <div class="score-item">
+        <div class="lbl">Classification <span id="s1">0 / 3.0</span></div>
+        <div class="bar"><i id="b1"></i></div>
+      </div>
+      <div class="score-item">
+        <div class="lbl">Correct Reference <span id="s2">0 / 2.0</span></div>
+        <div class="bar"><i id="b2"></i></div>
+      </div>
+      <div class="score-item">
+        <div class="lbl">Practical CAPA <span id="s3">0 / 2.0</span></div>
+        <div class="bar"><i id="b3"></i></div>
+      </div>
+      <div class="score-item">
+        <div class="lbl">Presentation Clarity <span id="s4">0 / 3.0</span></div>
+        <div class="bar violet"><i id="b4"></i></div>
+      </div>
+    </div>
+    <div class="total-box">
+      <b id="totalScore">0.0</b>
+      <span>out of 10</span>
+    </div>
+  </section>
+
+  <!-- SCENARIOS -->
+  <h2 class="section-title"><span class="n">📋</span> Scenario Cards</h2>
+  <div id="scenarios"></div>
+
+  <!-- PRESENTATION PANEL -->
+  <section class="presentation">
+    <h3><span class="ic">🎤</span> Facilitator Assessment — Presentation Clarity</h3>
+    <p>After each group presents their findings, the facilitator awards points for clarity, confidence, and evidence-based reasoning. Maximum <b>3 points</b>.</p>
+    <div class="pres-opts" id="presOpts">
+      <button class="pres-opt" data-pts="0">
+        0 Points — Weak
+        <span>Unclear, no references cited, poor reasoning</span>
+      </button>
+      <button class="pres-opt" data-pts="1">
+        1 Point — Developing
+        <span>Some structure, few references, gaps in logic</span>
+      </button>
+      <button class="pres-opt" data-pts="2">
+        2 Points — Competent
+        <span>Clear structure, references cited, sound reasoning</span>
+      </button>
+      <button class="pres-opt" data-pts="3">
+        3 Points — Excellent
+        <span>Confident, well-structured, all references cited, strong CAPA</span>
+      </button>
+    </div>
+  </section>
+
+</main>
+
+<!-- ================= FOOTER BAR ================= -->
+<footer class="footbar">
+  <div class="foot-score">
+    <b id="footTotal">0.0</b>
+    <span>/ 10 points</span>
+  </div>
+  <div class="spacer"></div>
+  <button class="tbtn primary" id="downloadBtn">⬇ Download Results</button>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================
+   SCENARIO DATA
+   ========================================================= */
+const TYPES = [
+  "Pyrogen (Endotoxin)",
+  "Microbial (Viable)",
+  "Particulate",
+  "Chemical",
+  "Cross-Contamination",
+  "Mycoplasma"
+];
+
+const REFERENCES = [
+  "USP <51> — Antimicrobial Effectiveness Testing",
+  "USP <61> — Microbial Enumeration Tests",
+  "USP <62> — Tests for Specified Microorganisms",
+  "USP <63> — Mycoplasma Tests",
+  "USP <71> — Sterility Tests",
+  "USP <85> — Bacterial Endotoxins Test",
+  "USP <788> — Subvisible Particulate Matter",
+  "USP <790> — Visible Particulates in Injections",
+  "USP <1111> — Microbiological Quality of Nonsterile Products",
+  "EU GMP Annex 1 — Contamination Control Strategy",
+  "EU GMP Chapter 5 — Production",
+  "EMA Guideline — Cleaning Validation",
+  "ICH Q9 — Quality Risk Management"
+];
+
+const SCENARIOS = [
+  {
+    n: 1,
+    title: "The Sterile Fever",
+    tag: "Case File",
+    case: `A patient develops chills and a fever of <b>39.2 °C within 45 minutes</b> of receiving an intravenous antibiotic infusion. The batch <b>passed USP &lt;71&gt; sterility testing</b> and no visible particles were observed on 100 % inspection. Investigation confirms the product was sterile.`,
+    type: "Pyrogen (Endotoxin)",
+    refs: ["USP <85> — Bacterial Endotoxins Test"],
+    capa: "Implement routine Bacterial Endotoxin Testing (BET) on the API and finished product. Validate depyrogenation of glass vials (e.g., dry heat ≥ 250 °C for 30 minutes) and establish maximum hold times for equipment and bulk solution.",
+    why: "The product was sterile — so the reaction was not caused by viable organisms. A fever within 45 minutes is a classic pyrogenic response to heat-stable lipopolysaccharides (endotoxins) from Gram-negative bacteria that survive sterilisation and are not detected by sterility testing."
+  },
+  {
+    n: 2,
+    title: "The Grade A Excursion",
+    tag: "Case File",
+    case: `During aseptic filling of a biologic, a settle plate exposed in the <b>Grade A filling zone for 4 hours</b> shows <b>5 CFU of Gram-positive cocci</b>. The operator had performed an <b>intervention to clear a jammed stopper</b> approximately 30 minutes before the plate was removed.`,
+    type: "Microbial (Viable)",
+    refs: ["EU GMP Annex 1 — Contamination Control Strategy"],
+    capa: "Investigate and requalify the intervention. Retrain the operator on aseptic technique, increase finger-dab and gown sampling, review first-air protection during the intervention, and formally assess the impact on the affected batch.",
+    why: "Gram-positive cocci are typical human skin flora — this points to a personnel-driven viable contamination event during a critical intervention in the critical zone. Under EU GMP Annex 1, Grade A excursions must be investigated as deviations with CAPA and batch impact assessment."
+  },
+  {
+    n: 3,
+    title: "Something in the Vial",
+    tag: "Case File",
+    case: `A 100 % visual inspection operator rejects a batch of injectable vials because <b>translucent, irregularly shaped particles</b> are visible when the vial is swirled. Laboratory analysis identifies the particles as <b>glass lamellae</b>.`,
+    type: "Particulate",
+    refs: ["USP <790> — Visible Particulates in Injections", "USP <788> — Subvisible Particulate Matter"],
+    capa: "Investigate the vial supplier and glass quality. Review the vial washing and depyrogenation tunnel conditions (thermal shock can cause lamellae). Implement validated automatic particle inspection in addition to manual inspection, and quarantine affected batches.",
+    why: "Glass lamellae are visible particulates formed when glass surfaces are damaged during forming, washing, or depyrogenation. USP <790> governs visible particulates in injections; USP <788> covers subvisible particulates. Particulates in injectables can cause embolism, inflammation, and allergic reactions."
+  },
+  {
+    n: 4,
+    title: "The Sticky Residue",
+    tag: "Case File",
+    case: `Swab samples taken from a tablet press after changeover show a residue that reacts strongly with the <b>Total Organic Carbon (TOC)</b> analyser. The residue is identified as a component of the <b>alkaline cleaning agent</b> used by the cleaning crew.`,
+    type: "Chemical",
+    refs: ["EMA Guideline — Cleaning Validation", "EU GMP Annex 1 — Contamination Control Strategy"],
+    capa: "Revise the cleaning validation to include a validated rinse step. Verify cleanliness using TOC and a specific analytical method for the detergent. Retrain cleaning personnel on the revised procedure and increase rinse volume or time.",
+    why: "Chemical contamination from residual cleaning agents can alter the safety, efficacy, or stability of the drug product. EMA cleaning validation guidance requires that residues be reduced to acceptable limits, and EU GMP Annex 1 includes chemical residues within the Contamination Control Strategy."
+  },
+  {
+    n: 5,
+    title: "The Wrong Tablet",
+    tag: "Case File",
+    case: `During packaging of <b>Product B</b>, an operator finds <b>three tablets of Product A</b> inside a blister pocket. Both products are manufactured on the <b>same blister line</b> and share the same tablet colour and shape.`,
+    type: "Cross-Contamination",
+    refs: ["EU GMP Chapter 5 — Production", "EU GMP Annex 1 — Contamination Control Strategy"],
+    capa: "Strengthen line clearance procedures with independent second-person verification. Improve physical segregation and consider dedicated equipment for high-risk products. Introduce colour/shape differentiation and retrain operators on changeover procedures.",
+    why: "This is a classic cross-contamination event — traces of one product unintentionally transferred to another via shared equipment. EU GMP Chapter 5 requires effective line clearance and segregation to prevent mix-ups, and Annex 1 requires cross-contamination to be addressed within the Contamination Control Strategy."
+  }
+];
+
+/* =========================================================
+   STATE
+   ========================================================= */
+let state = SCENARIOS.map(() => ({
+  type: null,
+  ref: "",
+  capa: "",
+  checked: false,
+  typeOK: false,
+  refOK: false,
+  capaOK: false
+}));
+let presentationPts = 0;
+let keyVisible = false;
+
+/* =========================================================
+   RENDER SCENARIOS
+   ========================================================= */
+const container = document.getElementById('scenarios');
+
+SCENARIOS.forEach((s, i) => {
+  const card = document.createElement('article');
+  card.className = 'scenario';
+  card.id = 'sc' + i;
+
+  card.innerHTML = `
+    <div class="sc-head">
+      <span class="num">${s.n}</span>
+      <h3>${s.title}</h3>
+      <span class="tag">${s.tag}</span>
+    </div>
+
+    <div class="case">${s.case}</div>
+
+    <div class="q">
+      <label><span class="k">1</span> Type of contamination <span class="hint">3 pts</span></label>
+      <div class="opts" data-role="type">
+        ${TYPES.map(t => `
+          <label class="opt">
+            <input type="radio" name="type-${i}" value="${t}">
+            <span class="dot"></span>${t}
+          </label>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="q">
+      <label><span class="k">2</span> Applicable USP chapter / guideline <span class="hint">2 pts</span></label>
+      <select class="ref" data-role="ref">
+        <option value="">— Select a reference —</option>
+        ${REFERENCES.map(r => `<option value="${r}">${r}</option>`).join('')}
+      </select>
+    </div>
+
+    <div class="q">
+      <label><span class="k">3</span> One corrective action to prevent recurrence <span class="hint">2 pts</span></label>
+      <textarea class="capa" data-role="capa" placeholder="Describe one specific, practical CAPA — e.g., what procedure, control, or training would you change?"></textarea>
+      <div class="counter"><span data-role="count">0</span> / 20 characters minimum</div>
+    </div>
+
+    <div class="answer-key" id="key-${i}">
+      <div class="row"><span class="lbl">Type:</span> <b>${s.type}</b></div>
+      <div class="row"><span class="lbl">Reference:</span> <b>${s.refs[0]}</b></div>
+      <div class="row"><span class="lbl">CAPA:</span> ${s.capa}</div>
+      <div class="row" style="margin-top:8px"><span class="lbl">Why:</span> ${s.why}</div>
+    </div>
+
+    <div class="feedback" data-role="feedback"></div>
+
+    <div class="sc-foot">
+      <button class="check-btn" data-role="check">✓ Check this card</button>
+      <span class="score-pill" data-role="pill">Not checked</span>
+    </div>
+  `;
+
+  container.appendChild(card);
+});
+
+/* =========================================================
+   EVENT WIRING
+   ========================================================= */
+container.addEventListener('change', e => {
+  const card = e.target.closest('.scenario');
+  const idx = Number(card.id.replace('sc', ''));
+
+  if (e.target.type === 'radio') {
+    state[idx].type = e.target.value;
+  }
+  if (e.target.classList.contains('ref')) {
+    state[idx].ref = e.target.value;
+  }
+});
+
+container.addEventListener('input', e => {
+  if (e.target.classList.contains('capa')) {
+    const card = e.target.closest('.scenario');
+    const idx = Number(card.id.replace('sc', ''));
+    state[idx].capa = e.target.value;
+    const counter = card.querySelector('[data-role="count"]');
+    counter.textContent = e.target.value.trim().length;
+  }
+});
+
+container.addEventListener('click', e => {
+  const btn = e.target.closest('[data-role="check"]');
+  if (!btn) return;
+  const card = btn.closest('.scenario');
+  const idx = Number(card.id.replace('sc', ''));
+  checkCard(idx);
+});
+
+/* =========================================================
+   CHECK LOGIC
+   ========================================================= */
+function checkCard(idx) {
+  const s = SCENARIOS[idx];
+  const st = state[idx];
+  const card = document.getElementById('sc' + idx);
+
+  // Type
+  st.typeOK = st.type === s.type;
+
+  // Reference (accept any of the listed acceptable references)
+  st.refOK = s.refs.includes(st.ref);
+
+  // CAPA (min 20 characters of meaningful content)
+  st.capaOK = st.capa.trim().length >= 20;
+
+  st.checked = true;
+
+  // Visual — Type pills
+  card.querySelectorAll('[data-role="type"] .opt').forEach(opt => {
+    const input = opt.querySelector('input');
+    opt.classList.remove('correct', 'wrong');
+    if (input.value === s.type) opt.classList.add('correct');
+    else if (input.checked) opt.classList.add('wrong');
+  });
+
+  // Visual — Reference select
+  const sel = card.querySelector('.ref');
+  sel.classList.remove('correct', 'wrong');
+  sel.classList.add(st.refOK ? 'correct' : 'wrong');
+
+  // Visual — CAPA
+  const ta = card.querySelector('.capa');
+  ta.classList.remove('correct', 'wrong');
+  ta.classList.add(st.capaOK ? 'correct' : 'wrong');
+
+  // Feedback
+  const fb = card.querySelector('[data-role="feedback"]');
+  fb.innerHTML = `
+    ${fbLine(st.typeOK,
+      `Classification correct — <b>${s.type}</b>.`,
+      `Classification incorrect. Correct answer: <b>${s.type}</b>.`)}
+    ${fbLine(st.refOK,
+      `Reference correct — <b>${st.ref}</b>.`,
+      `Reference incorrect. Best answer: <b>${s.refs[0]}</b>.`)}
+    ${fbLine(st.capaOK,
+      `CAPA recorded — good, a specific action was proposed.`,
+      `CAPA too brief. A strong CAPA is specific, actionable, and addresses the root cause (min. 20 characters).`)}
+  `;
+  fb.classList.add('show');
+
+  // Score pill
+  const pill = card.querySelector('[data-role="pill"]');
+  const pts = (st.typeOK ? 3 : 0) + (st.refOK ? 2 : 0) + (st.capaOK ? 2 : 0);
+  if (pts === 7) {
+    pill.className = 'score-pill ok';
+    pill.textContent = '✓ 7 / 7 — Excellent';
+    card.className = 'scenario checked-ok';
+  } else if (pts >= 4) {
+    pill.className = 'score-pill part';
+    pill.textContent = '◐ ' + pts + ' / 7 — Partial';
+    card.className = 'scenario checked-part';
+  } else {
+    pill.className = 'score-pill bad';
+    pill.textContent = '✗ ' + pts + ' / 7 — Review';
+    card.className = 'scenario checked-bad';
+  }
+
+  updateScores();
+}
+
+function fbLine(ok, okMsg, badMsg) {
+  return `<div class="fb-line ${ok ? 'ok' : 'bad'}">
+    <span class="ic">${ok ? '✅' : '❌'}</span>
+    <span>${ok ? okMsg : badMsg}</span>
+  </div>`;
+}
+
+/* =========================================================
+   SCORE UPDATE
+   ========================================================= */
+function updateScores() {
+  const checked = state.filter(s => s.checked).length;
+  if (checked === 0) {
+    setBar(1, 0, 3, '0 / 3.0');
+    setBar(2, 0, 2, '0 / 2.0');
+    setBar(3, 0, 2, '0 / 2.0');
+    setBar(4, presentationPts, 3, presentationPts.toFixed(1) + ' / 3.0');
+    setTotal(0);
+    return;
+  }
+
+  // Classification — scaled to 3 pts based on all 5 scenarios
+  const typeCorrect = state.filter(s => s.typeOK).length;
+  const clsPts = (typeCorrect / 5) * 3;
+
+  // Reference — scaled to 2 pts
+  const refCorrect = state.filter(s => s.refOK).length;
+  const refPts = (refCorrect / 5) * 2;
+
+  // CAPA — scaled to 2 pts
+  const capaCorrect = state.filter(s => s.capaOK).length;
+  const capaPts = (capaCorrect / 5) * 2;
+
+  setBar(1, clsPts, 3, clsPts.toFixed(1) + ' / 3.0');
+  setBar(2, refPts, 2, refPts.toFixed(1) + ' / 2.0');
+  setBar(3, capaPts, 2, capaPts.toFixed(1) + ' / 2.0');
+  setBar(4, presentationPts, 3, presentationPts.toFixed(1) + ' / 3.0');
+
+  setTotal(clsPts + refPts + capaPts + presentationPts);
+}
+
+function setBar(n, val, max, label) {
+  const pct = Math.max(0, Math.min(100, (val / max) * 100));
+  document.getElementById('b' + n).style.width = pct + '%';
+  document.getElementById('s' + n).textContent = label;
+}
+
+function setTotal(v) {
+  const rounded = Math.round(v * 10) / 10;
+  document.getElementById('totalScore').textContent = rounded.toFixed(1);
+  document.getElementById('footTotal').textContent = rounded.toFixed(1);
+}
+
+/* =========================================================
+   PRESENTATION SCORE
+   ========================================================= */
+document.getElementById('presOpts').addEventListener('click', e => {
+  const btn = e.target.closest('.pres-opt');
+  if (!btn) return;
+  document.querySelectorAll('.pres-opt').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  presentationPts = Number(btn.dataset.pts);
+  updateScores();
+  showToast('🎤 Presentation score set to ' + presentationPts + ' / 3');
+});
+
+/* =========================================================
+   ANSWER KEY TOGGLE
+   ========================================================= */
+const keyBtn = document.getElementById('keyBtn');
+keyBtn.addEventListener('click', () => {
+  keyVisible = !keyVisible;
+  keyBtn.classList.toggle('on', keyVisible);
+  document.querySelectorAll('.answer-key').forEach(el => {
+    el.classList.toggle('show', keyVisible);
+  });
+  showToast(keyVisible ? '🔑 Answer key shown' : '🔑 Answer key hidden');
+});
+
+/* =========================================================
+   CHECK ALL
+   ========================================================= */
+document.getElementById('checkAllBtn').addEventListener('click', () => {
+  let anyUnchecked = false;
+  state.forEach((st, i) => {
+    if (!st.checked) {
+      anyUnchecked = true;
+      checkCard(i);
+    }
+  });
+  if (anyUnchecked) showToast('✓ All scenario cards checked');
+  else showToast('All cards already checked — scroll up to review');
+});
+
+/* =========================================================
+   RESET
+   ========================================================= */
+document.getElementById('resetBtn').addEventListener('click', () => {
+  if (!confirm('Reset all answers and scores?')) return;
+
+  state = SCENARIOS.map(() => ({
+    type: null, ref: "", capa: "", checked: false,
+    typeOK: false, refOK: false, capaOK: false
+  }));
+  presentationPts = 0;
+
+  document.querySelectorAll('.scenario').forEach(card => {
+    card.className = 'scenario';
+    card.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+    card.querySelectorAll('.opt').forEach(o => o.classList.remove('correct', 'wrong'));
+    const sel = card.querySelector('.ref');
+    sel.value = '';
+    sel.classList.remove('correct', 'wrong');
+    const ta = card.querySelector('.capa');
+    ta.value = '';
+    ta.classList.remove('correct', 'wrong');
+    card.querySelector('[data-role="count"]').textContent = '0';
+    card.querySelector('[data-role="feedback"]').classList.remove('show');
+    card.querySelector('[data-role="feedback"]').innerHTML = '';
+    const pill = card.querySelector('[data-role="pill"]');
+    pill.className = 'score-pill';
+    pill.textContent = 'Not checked';
+  });
+
+  document.querySelectorAll('.pres-opt').forEach(b => b.classList.remove('active'));
+
+  // Hide answer key on reset
+  if (keyVisible) {
+    keyVisible = false;
+    keyBtn.classList.remove('on');
+    document.querySelectorAll('.answer-key').forEach(el => el.classList.remove('show'));
+  }
+
+  updateScores();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  showToast('↺ Activity reset');
+});
+
+/* =========================================================
+   PRINT
+   ========================================================= */
+document.getElementById('printBtn').addEventListener('click', () => window.print());
+
+/* =========================================================
+   DOWNLOAD RESULTS
+   ========================================================= */
+document.getElementById('downloadBtn').addEventListener('click', () => {
+  const lines = [];
+  lines.push('ACTIVITY 1 — CLASSIFY THE CONTAMINATION');
+  lines.push('Basic Microbiology · QC Yearly Training Plan 2026');
+  lines.push('Prepared by Muhammad Firdaus Abdullah');
+  lines.push('='.repeat(66));
+  lines.push('');
+
+  SCENARIOS.forEach((s, i) => {
+    const st = state[i];
+    lines.push(`SCENARIO ${s.n}: ${s.title}`);
+    lines.push('-'.repeat(66));
+    lines.push(`Case: ${stripTags(s.case)}`);
+    lines.push('');
+    lines.push(`1. Type of Contamination`);
+    lines.push(`   Group answer : ${st.type || '(not answered)'}`);
+    lines.push(`   Correct      : ${s.type}  ${st.typeOK ? '✓' : '✗'}`);
+    lines.push('');
+    lines.push(`2. Applicable Reference`);
+    lines.push(`   Group answer : ${st.ref || '(not answered)'}`);
+    lines.push(`   Correct      : ${s.refs[0]}  ${st.refOK ? '✓' : '✗'}`);
+    lines.push('');
+    lines.push(`3. Corrective Action (CAPA)`);
+    lines.push(`   Group answer : ${st.capa.trim() || '(not answered)'}`);
+    lines.push(`   Status       : ${st.capaOK ? '✓ Sufficient detail' : '✗ Insufficient detail'}`);
+    lines.push('');
+    lines.push(`Key insight: ${s.why}`);
+    lines.push('');
+    lines.push('='.repeat(66));
+    lines.push('');
+  });
+
+  const cls = (state.filter(s => s.typeOK).length / 5) * 3;
+  const ref = (state.filter(s => s.refOK).length / 5) * 2;
+  const capa = (state.filter(s => s.capaOK).length / 5) * 2;
+  const total = cls + ref + capa + presentationPts;
+
+  lines.push('SCORE SUMMARY');
+  lines.push('-'.repeat(66));
+  lines.push(`Classification      : ${cls.toFixed(1)} / 3.0   (${state.filter(s => s.typeOK).length}/5 correct)`);
+  lines.push(`Correct Reference   : ${ref.toFixed(1)} / 2.0   (${state.filter(s => s.refOK).length}/5 correct)`);
+  lines.push(`Practical CAPA      : ${capa.toFixed(1)} / 2.0   (${state.filter(s => s.capaOK).length}/5 valid)`);
+  lines.push(`Presentation Clarity: ${presentationPts.toFixed(1)} / 3.0   (facilitator-assessed)`);
+  lines.push('-'.repeat(66));
+  lines.push(`TOTAL               : ${total.toFixed(1)} / 10.0`);
+  lines.push('');
+  lines.push('='.repeat(66));
+  lines.push('Generated: ' + new Date().toLocaleString());
+
+  const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'Activity-1-Contamination-Results.txt';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  showToast('⬇ Results downloaded as .txt');
+});
+
+function stripTags(html) {
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  return tmp.textContent.replace(/\s+/g, ' ').trim();
+}
+
+/* =========================================================
+   TIMER — 10:00 countdown
+   ========================================================= */
+const TIMER_START = 10 * 60; // 10 minutes in seconds
+let timeLeft = TIMER_START;
+let timerRunning = false;
+let timerInterval = null;
+
+const clockEl = document.getElementById('clock');
+const timerEl = document.getElementById('timer');
+const startBtn = document.getElementById('startBtn');
+
+function renderClock() {
+  const m = Math.floor(timeLeft / 60);
+  const s = timeLeft % 60;
+  clockEl.textContent = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+
+  timerEl.classList.remove('warning', 'danger');
+  if (timeLeft <= 60) timerEl.classList.add('danger');
+  else if (timeLeft <= 180) timerEl.classList.add('warning');
+}
+
+function tick() {
+  if (timeLeft > 0) {
+    timeLeft--;
+    renderClock();
+    if (timeLeft === 60) showToast('⚠ 1 minute remaining!');
+    if (timeLeft === 0) {
+      stopTimer();
+      showToast('⏰ Time is up — begin group presentations');
+    }
+  } else {
+    stopTimer();
+  }
+}
+
+function startTimer() {
+  if (timerRunning) return;
+  timerRunning = true;
+  startBtn.textContent = '❚❚';
+  timerInterval = setInterval(tick, 1000);
+}
+
+function stopTimer() {
+  timerRunning = false;
+  startBtn.textContent = '▶';
+  clearInterval(timerInterval);
+}
+
+startBtn.addEventListener('click', () => {
+  timerRunning ? stopTimer() : startTimer();
+});
+
+document.getElementById('resetTimer').addEventListener('click', () => {
+  stopTimer();
+  timeLeft = TIMER_START;
+  renderClock();
+  showToast('↺ Timer reset to 10:00');
+});
+
+renderClock();
+
+/* =========================================================
+   TOAST
+   ========================================================= */
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+/* =========================================================
+   INIT
+   ========================================================= */
+updateScores();
+</script>
 </body>
 </html>
